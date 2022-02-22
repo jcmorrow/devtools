@@ -132,6 +132,7 @@ export const client = new ProtocolClient({
 });
 
 function onSocketMessage(evt: MessageEvent<any>) {
+  console.log(evt);
   lastReceivedMessageTime = Date.now();
   gReceivedBytes += evt.data.length;
   const msg = JSON.parse(evt.data);

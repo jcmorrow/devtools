@@ -113,6 +113,9 @@ let gDevicePixelRatio = 1;
 function onPaints({ paints }: paintPoints) {
   paints.forEach(({ point, time, screenShots }) => {
     const paintHash = screenShots.find(desc => desc.mimeType == "image/jpeg")!.hash;
+
+    screenshotCache.getScreenshotForPlayback(point, paintHash);
+
     insertEntrySorted(gPaintPoints, { point, time, paintHash });
   });
 }
