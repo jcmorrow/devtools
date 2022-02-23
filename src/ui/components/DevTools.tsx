@@ -57,6 +57,7 @@ function _DevTools({
 
   useEffect(() => {
     import("./Views/DevView");
+    console.log({ now: performance.now(), loadingFinished });
   }, []);
 
   useEffect(() => {
@@ -90,6 +91,7 @@ function _DevTools({
   if (!loadingFinished) {
     return <LoadingScreen />;
   }
+  console.log({ now: performance.now(), loadingFinished });
 
   return (
     <>

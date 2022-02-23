@@ -1,7 +1,7 @@
 // Routines for managing and rendering graphics data fetched over the WRP.
 
 import { ThreadFront } from "./thread";
-import { assert, binarySearch } from "./utils";
+import { assert, binarySearch, defer, Deferred } from "./utils";
 import { DownloadCancelledError, ScreenshotCache } from "./screenshot-cache";
 import ResizeObserverPolyfill from "resize-observer-polyfill";
 import {
@@ -110,13 +110,19 @@ const gMouseClickEvents: MouseEvent[] = [];
 // Device pixel ratio used by the current screenshot.
 let gDevicePixelRatio = 1;
 
+let gHaveStartedLoadingPaints = false;
+
 function onPaints({ paints }: paintPoints) {
   paints.forEach(({ point, time, screenShots }) => {
     const paintHash = screenShots.find(desc => desc.mimeType == "image/jpeg")!.hash;
+    if (!gHaveStartedLoadingPaints) {
+      precacheScreenshots(0);
+      paintPointsWaiter.resolve();
+    }
 
     console.log({ point, time });
     console.log(`LOADING SCREENSHOT ${time}`);
-    screenshotCache.getScreenshotForPlayback(point, paintHash);
+    // screenshotCache.getScreenshotForPlayback(point, paintHash);
 
     insertEntrySorted(gPaintPoints, { point, time, paintHash });
   });
@@ -198,7 +204,7 @@ class VideoPlayer {
 export const Video = new VideoPlayer();
 
 let onRefreshGraphics: (canvas: Canvas) => void;
-let paintPointsWaiter: Promise<findPaintsResult>;
+let paintPointsWaiter: Deferred<void> = defer();
 
 export function setupGraphics(store: UIStore) {
   onRefreshGraphics = (canvas: Canvas) => {
@@ -208,7 +214,7 @@ export function setupGraphics(store: UIStore) {
   Video.init(store);
 
   ThreadFront.sessionWaiter.promise.then((sessionId: string) => {
-    paintPointsWaiter = client.Graphics.findPaints({}, sessionId);
+    client.Graphics.findPaints({}, sessionId);
     client.Graphics.addPaintPointsListener(onPaints);
 
     client.Session.findMouseEvents({}, sessionId);
@@ -348,7 +354,7 @@ export async function getGraphicsAtTime(
   time: number,
   forPlayback = false
 ): Promise<{ screen?: ScreenShot; mouse?: MouseAndClickPosition }> {
-  // await paintPointsWaiter;
+  await paintPointsWaiter;
   const paintIndex = mostRecentIndex(gPaintPoints, time);
   if (paintIndex === undefined) {
     // There are no graphics to paint here.
