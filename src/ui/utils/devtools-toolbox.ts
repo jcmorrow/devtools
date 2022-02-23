@@ -54,7 +54,9 @@ export class DevToolsToolbox {
   }
 
   async init(selectedPanel: StartablePanelName) {
+    console.log("BEFORE INITIALIZE TOOLBOX");
     await this.threadFront.initializeToolbox();
+    console.log("AFTER INITIALIZE TOOLBOX");
 
     // The debugger has to be started immediately on init so that when we click
     // on any of those messages, either on the console or the timeline, the debugger

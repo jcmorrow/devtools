@@ -71,6 +71,7 @@ export default function update(
         ...action.parameters.loading.map(r => r.end.time),
         state.recordingDuration
       );
+      console.log({ loadedRegions: action.parameters });
       return { ...state, loadedRegions: action.parameters, recordingDuration };
     }
 

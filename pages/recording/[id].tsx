@@ -130,7 +130,9 @@ function RecordingPage({
     }
 
     async function getRecording() {
+      console.log("BEFORE SETUP STORE");
       await setup(store);
+      console.log("AFTER SETUP STORE");
       setRecording(await getAccessibleRecording(recordingId));
     }
     getRecording();

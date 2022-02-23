@@ -19,13 +19,14 @@ import { ExpectedError, UnexpectedError } from "ui/state/app";
 import { getRecording } from "ui/hooks/recordings";
 import { getRecordingId } from "ui/utils/recording";
 import { getUserId, getUserInfo } from "ui/hooks/users";
-import { jumpToInitialPausePoint } from "./timeline";
+import { jumpToInitialPausePoint, seekToTime, startPlayback } from "./timeline";
 import { Recording } from "ui/types";
 import { subscriptionExpired } from "ui/utils/workspace";
 import { ApolloError } from "@apollo/client";
 import { getUserSettings } from "ui/hooks/settings";
 import { setViewMode } from "./layout";
 import { getSelectedPanel } from "ui/reducers/layout";
+import { getFirstMeaningfulPaint } from "protocol/graphics";
 
 export type SetUnexpectedErrorAction = Action<"set_unexpected_error"> & {
   error: UnexpectedError;
@@ -133,9 +134,10 @@ export function createSession(recordingId: string): UIThunkAction {
       ThreadFront.setTest(getTest() || undefined);
       ThreadFront.recordingId = recordingId;
 
-      dispatch(showLoadingProgress()).then(() => {
-        dispatch(onLoadingFinished());
-      });
+      console.log("BEFORE FIRST MEANINGFUL PAINT");
+      await getFirstMeaningfulPaint();
+      dispatch(onLoadingFinished());
+      console.log("AFTER FIRST MEANINGFUL PAINT");
 
       const { sessionId } = await sendMessage("Recording.createSession", {
         recordingId,
@@ -156,6 +158,8 @@ export function createSession(recordingId: string): UIThunkAction {
       prefs.recordingId = recordingId;
 
       dispatch(jumpToInitialPausePoint());
+      dispatch(seekToTime(0));
+      dispatch(startPlayback());
     } catch (e: any) {
       const currentError = selectors.getUnexpectedError(getState());
 
@@ -176,6 +180,7 @@ export function createSession(recordingId: string): UIThunkAction {
 export function showLoadingProgress(): UIThunkAction<Promise<void>> {
   return async ({ dispatch, getState }) => {
     let displayedProgress = selectors.getLoading(getState());
+    console.log("BEFORE LOADING DONE");
     while (displayedProgress < 100) {
       await waitForTime(200);
 
@@ -186,6 +191,7 @@ export function showLoadingProgress(): UIThunkAction<Promise<void>> {
 
       dispatch(actions.setDisplayedLoadingProgress(displayedProgress));
     }
+    console.log("AFTER LOADING DONE");
   };
 }
 

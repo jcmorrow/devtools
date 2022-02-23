@@ -114,6 +114,8 @@ function onPaints({ paints }: paintPoints) {
   paints.forEach(({ point, time, screenShots }) => {
     const paintHash = screenShots.find(desc => desc.mimeType == "image/jpeg")!.hash;
 
+    console.log({ point, time });
+    console.log(`LOADING SCREENSHOT ${time}`);
     screenshotCache.getScreenshotForPlayback(point, paintHash);
 
     insertEntrySorted(gPaintPoints, { point, time, paintHash });
@@ -346,7 +348,7 @@ export async function getGraphicsAtTime(
   time: number,
   forPlayback = false
 ): Promise<{ screen?: ScreenShot; mouse?: MouseAndClickPosition }> {
-  await paintPointsWaiter;
+  // await paintPointsWaiter;
   const paintIndex = mostRecentIndex(gPaintPoints, time);
   if (paintIndex === undefined) {
     // There are no graphics to paint here.

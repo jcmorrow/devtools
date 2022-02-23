@@ -112,7 +112,9 @@ export default async function DevTools(store: Store) {
   window.app.console = { prefs: consolePrefs };
   window.app.debugger = setupDebuggerHelper();
 
+  console.log("BEFORE INITIAL DEBUGGER STATE");
   const initialDebuggerState = await dbgClient.loadInitialState();
+  console.log("AFTER INITIAL DEBUGGER STATE");
   const initialConsoleState = getConsoleInitialState();
 
   const commandHistory = await asyncStore.commandHistory;
