@@ -117,7 +117,7 @@ function onPaints({ paints }: paintPoints) {
     const paintHash = screenShots.find(desc => desc.mimeType == "image/jpeg")!.hash;
     if (!gHaveStartedLoadingPaints) {
       precacheScreenshots(0);
-      paintPointsWaiter.resolve();
+      // paintPointsWaiter.resolve();
     }
 
     console.log({ point, time });
@@ -204,7 +204,7 @@ class VideoPlayer {
 export const Video = new VideoPlayer();
 
 let onRefreshGraphics: (canvas: Canvas) => void;
-let paintPointsWaiter: Deferred<void> = defer();
+let paintPointsWaiter: Deferred<void> | Promise<findPaintsResult> = defer();
 
 export function setupGraphics(store: UIStore) {
   onRefreshGraphics = (canvas: Canvas) => {
@@ -214,7 +214,8 @@ export function setupGraphics(store: UIStore) {
   Video.init(store);
 
   ThreadFront.sessionWaiter.promise.then((sessionId: string) => {
-    client.Graphics.findPaints({}, sessionId);
+    paintPointsWaiter = client.Graphics.findPaints({}, sessionId);
+    paintPointsWaiter.then(() => console.log("PAINT POINTS WAITER RESOLVED"));
     client.Graphics.addPaintPointsListener(onPaints);
 
     client.Session.findMouseEvents({}, sessionId);
@@ -354,7 +355,11 @@ export async function getGraphicsAtTime(
   time: number,
   forPlayback = false
 ): Promise<{ screen?: ScreenShot; mouse?: MouseAndClickPosition }> {
+  console.log("BEFORE PAINT POINTS WAITER");
+  console.log({ time, forPlayback });
+  console.trace();
   await paintPointsWaiter;
+  console.log("AFTER PAINT POINTS WAITER");
   const paintIndex = mostRecentIndex(gPaintPoints, time);
   if (paintIndex === undefined) {
     // There are no graphics to paint here.
