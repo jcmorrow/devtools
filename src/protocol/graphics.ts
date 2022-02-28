@@ -4,13 +4,7 @@ import { ThreadFront } from "./thread";
 import { assert, binarySearch, defer, Deferred } from "./utils";
 import { DownloadCancelledError, ScreenshotCache } from "./screenshot-cache";
 import ResizeObserverPolyfill from "resize-observer-polyfill";
-import {
-  TimeStampedPoint,
-  MouseEvent,
-  paintPoints,
-  ScreenShot,
-  findPaintsResult,
-} from "@recordreplay/protocol";
+import { TimeStampedPoint, MouseEvent, paintPoints, ScreenShot } from "@recordreplay/protocol";
 import { decode } from "base64-arraybuffer";
 import { client } from "./socket";
 import { UIStore, UIThunkAction } from "ui/actions";

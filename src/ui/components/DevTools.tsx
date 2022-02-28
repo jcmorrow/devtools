@@ -60,15 +60,13 @@ function _DevTools({
   }, []);
 
   useEffect(() => {
-    if (loading) {
-      return;
+    if (loadingFinished) {
+      trackEventOnce("session.devtools_start", {
+        userIsAuthor,
+        workspaceUuid: recording?.workspace?.id || null,
+      });
     }
-
-    trackEventOnce("session.devtools_start", {
-      userIsAuthor,
-      workspaceUuid: recording?.workspace?.id || null,
-    });
-  }, [loading]);
+  }, [loadingFinished]);
 
   useEffect(() => {
     createSession(recordingId);
