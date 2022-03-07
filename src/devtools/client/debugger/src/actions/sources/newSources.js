@@ -189,6 +189,7 @@ export function newGeneratedSource(sourceInfo) {
     return sources[0];
   };
 }
+
 export function newGeneratedSources(sourceInfo) {
   return async ({ dispatch, getState, client }) => {
     const resultIds = [];

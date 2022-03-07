@@ -233,6 +233,7 @@ const RequestDetails = ({
   requestBody: RequestBodyData[] | undefined;
   selectFrame: (cx: any, frame: WiredFrame) => void;
 }) => {
+  console.log({ request });
   const [activeTab, setActiveTab] = useState<NetworkTab>(DEFAULT_TAB);
 
   const { value: httpBodies } = useFeature("httpBodies");
