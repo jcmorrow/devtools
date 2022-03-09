@@ -32,7 +32,6 @@ import HighlightLine from "./HighlightLine";
 import HighlightLines from "./HighlightLines";
 import EditorLoadingBar from "./EditorLoadingBar";
 import { EditorNag } from "ui/components/shared/Nags/Nags";
-import { KeyModifiersContext } from "ui/components/KeyModifiers";
 
 import {
   showSourceText,
@@ -135,12 +134,19 @@ class Editor extends PureComponent {
     codeMirrorWrapper.addEventListener("mouseover", onGutterMouseOver(codeMirror));
 
     if (!isFirefox()) {
-      codeMirror.on("gutterContextMenu", (cm, line, eventName, event) =>
-        this.onGutterContextMenu(event)
-      );
-      codeMirror.on("contextmenu", (cm, event) => this.openMenu(event));
+      codeMirror.on("gutterContextMenu", (cm, line, eventName, event) => {
+        console.log(event);
+        this.onGutterContextMenu(event);
+      });
+      codeMirror.on("contextmenu", (cm, event) => {
+        console.log(event);
+        this.openMenu(event);
+      });
     } else {
-      codeMirrorWrapper.addEventListener("contextmenu", event => this.openMenu(event));
+      codeMirrorWrapper.addEventListener("contextmenu", event => {
+        console.log(event);
+        this.openMenu(event);
+      });
     }
 
     codeMirror.on("scroll", this.onEditorScroll);
@@ -437,10 +443,7 @@ class Editor extends PureComponent {
         <EmptyLines editor={editor} />
         <Breakpoints editor={editor} cx={cx} />
         <Preview editor={editor} editorRef={this.$editorWrapper} />
-        {
-          <KeyModifiersContext.Consumer>
-            {keyModifiers => <LineNumberTooltip editor={editor} keyModifiers={keyModifiers} />}
-          </KeyModifiersContext.Consumer>
+        {<LineNumberTooltip editor={editor} />}
         }
         <ToggleWidgetButton editor={editor} />
         <HighlightLines editor={editor} />

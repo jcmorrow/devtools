@@ -2,7 +2,6 @@ import { PointDescription } from "@recordreplay/protocol";
 import React, { useRef, useState, useEffect, ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setHoveredLineNumberLocation } from "ui/actions/app";
-import { KeyModifiers } from "ui/components/KeyModifiers";
 import MaterialIcon from "ui/components/shared/MaterialIcon";
 import hooks from "ui/hooks";
 import { Nag } from "ui/hooks/users";
@@ -64,11 +63,10 @@ function Wrapper({
   return <div className="static-tooltip-content bg-gray-700">{children}</div>;
 }
 
-export default function LineNumberTooltip({ editor, keyModifiers }: { editor: any; keyModifiers: KeyModifiers }) {
+export default function LineNumberTooltip({ editor }: { editor: any }) {
   const dispatch = useDispatch();
   const [targetNode, setTargetNode] = useState<HTMLElement | null>(null);
   const lastHoveredLineNumber = useRef<number | null>(null);
-  const isMetaActive = keyModifiers.meta;
 
   const indexed = useSelector(selectors.getIndexed);
   const analysisPoints = useSelector(selectors.getPointsForHoveredLineNumber);
@@ -76,9 +74,11 @@ export default function LineNumberTooltip({ editor, keyModifiers }: { editor: an
   const setHoveredLineNumber = ({
     lineNumber,
     lineNode,
+    event,
   }: {
     lineNumber: number;
     lineNode: HTMLElement;
+    event: MouseEvent;
   }) => {
     // The gutter re-renders when we click the line number to add
     // a breakpoint. That triggers a second gutterLineEnter event
@@ -119,7 +119,7 @@ export default function LineNumberTooltip({ editor, keyModifiers }: { editor: an
     }
   }, [analysisPoints]);
 
-  if (!targetNode || isMetaActive) {
+  if (!targetNode) {
     return null;
   }
 
