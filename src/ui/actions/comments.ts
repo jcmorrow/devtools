@@ -1,7 +1,7 @@
 import { Action } from "redux";
 import { selectors } from "ui/reducers";
 import { actions } from "ui/actions";
-import { PendingComment, Comment, Reply, SourceLocation, CommentOptions } from "ui/state/comments";
+import { PendingComment, Comment, Reply, CommentOptions } from "ui/state/comments";
 import { UIThunkAction } from ".";
 import { ThreadFront } from "protocol/thread";
 import escapeHtml from "escape-html";
@@ -23,7 +23,10 @@ const {
 } = require("devtools/client/debugger/src/utils/editor/create-editor");
 
 type AddPendingComment = Action<"add_pending_comment"> & { comment: PendingComment };
-type UpdatePendingComment = Action<"update_pending_comment"> & { comment: PendingComment };
+type UpdatePendingComment = Action<"update_pending_comment"> & {
+  comment: PendingComment;
+  persistedAs?: string;
+};
 type RemovePendingComment = Action<"remove_pending_comment"> & { id: string };
 type SetHoveredComment = Action<"set_hovered_comment"> & { comment: any };
 
@@ -37,7 +40,7 @@ export function addPendingComment(comment: PendingComment): AddPendingComment {
   return { type: "add_pending_comment", comment };
 }
 
-export function updatePendingComment(comment: any): UpdatePendingComment {
+export function updatePendingComment(comment: PendingComment): UpdatePendingComment {
   return { type: "update_pending_comment", comment };
 }
 
@@ -68,7 +71,7 @@ export function createComment(
         content: "",
         createdAt: new Date().toISOString(),
         hasFrames,
-        id: btoa(`c:${crypto.randomUUID!()}`),
+        id: crypto.randomUUID!(),
         networkRequestId: networkRequestId || null,
         point,
         position,

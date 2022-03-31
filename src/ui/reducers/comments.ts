@@ -1,4 +1,4 @@
-import { CommentsState } from "ui/state/comments";
+import { CommentsState, PendingComment } from "ui/state/comments";
 import { CommentsAction } from "ui/actions/comments";
 import { UIState } from "ui/state";
 
@@ -32,13 +32,17 @@ export default function update(
     }
 
     case "update_pending_comment": {
+      console.log({ action, state });
+      const update: PendingComment = action.comment;
+      const existing: PendingComment = state.pendingComments[action.comment.comment!.id];
+      console.log({ update, existing });
       return {
         ...state,
         pendingComments: {
           ...state.pendingComments,
-          [action.comment.comment.id]: {
-            ...state.pendingComments[action.comment.comment.id],
-            ...action.comment,
+          [update.comment!.id]: {
+            ...existing,
+            ...update,
           },
         },
       };

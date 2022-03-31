@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { connect, ConnectedProps, useSelector } from "react-redux";
+import { connect, ConnectedProps, useDispatch, useSelector } from "react-redux";
 import classNames from "classnames";
 import { UIState } from "ui/state";
 import { selectors } from "ui/reducers";
@@ -23,6 +23,7 @@ import NetworkRequestPreview from "./NetworkRequestPreview";
 import { useFeature } from "ui/hooks/settings";
 import { CommentData } from "./types";
 import { useGetUserId } from "ui/hooks/users";
+import { updatePendingComment } from "ui/actions/comments";
 const { getExecutionPoint } = require("devtools/client/debugger/src/reducers/pause");
 
 type PendingCommentProps = {
@@ -201,7 +202,6 @@ function CommentCard({
   comments,
   currentTime,
   executionPoint,
-  removePendingComment,
   setModal,
   seekToComment,
   setHoveredComment,
@@ -210,6 +210,7 @@ function CommentCard({
   const focusRegion = useSelector(getFocusRegion);
   const isOutsideFocusedRegion =
     focusRegion && (comment.time < focusRegion.startTime || comment.time > focusRegion.endTime);
+  const dispatch = useDispatch();
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -220,6 +221,7 @@ function CommentCard({
   const updateComment = hooks.useUpdateComment();
   const updateCommentReply = hooks.useUpdateCommentReply();
 
+  console.log({ comment });
   const replyKeys = commentKeys(comment.replies);
   const onAttachmentClick = () =>
     setModal("attachment", {
@@ -228,6 +230,7 @@ function CommentCard({
 
   const onSubmit = async (data: CommentData, inputValue: string) => {
     const { type, comment } = data;
+
     if (!isAuthenticated) {
       setModal("login");
       return;
@@ -238,7 +241,15 @@ function CommentCard({
     //   await addCommentReply({ ...comment, content: inputValue });
     // } else if (type == "new_comment") {
     // @ts-ignore
-    await addComment({ ...comment, content: inputValue });
+    const result = await addComment({ ...comment, content: inputValue });
+    console.log({ result });
+    dispatch(
+      updatePendingComment({
+        comment,
+        persistedAs: result.data?.addComment.comment.id,
+        type,
+      })
+    );
     // } else if (type === "comment") {
     //   await updateComment(comment.id, inputValue, (comment as Comment).position);
     // } else if (type === "reply") {

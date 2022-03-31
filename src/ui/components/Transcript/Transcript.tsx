@@ -6,7 +6,7 @@ import { Comment } from "ui/state/comments";
 import CommentCard from "ui/components/Comments/TranscriptComments/CommentCard";
 import useAuth0 from "ui/utils/useAuth0";
 import MaterialIcon from "ui/components/shared/MaterialIcon";
-import { sortBy, uniqBy } from "lodash";
+import { sortBy } from "lodash";
 
 export default function Transcript() {
   const recordingId = hooks.useGetRecordingId();
@@ -17,22 +17,16 @@ export default function Transcript() {
   const pendingComments = Object.values(useSelector(selectors.getPendingComments));
   const { isAuthenticated } = useAuth0();
 
-  // const displayedComments = useMemo(() => {
-  //   const displayedComments: Comment[] = [...comments].filter(comment => true);
-
-  //   const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
-  //   return sortedComments;
-  // }, [comments]);
-  const notReplies = pendingComments
-    .filter(c => c.type === "new_comment")
-    .map(c => c.comment) as Comment[];
-  console.log({ notReplies });
-  const notInCache = comments.filter(c => !notReplies.map(nr => nr.id).includes(c.id));
-  const displayedComments: Comment[] = [...notReplies, ...notInCache];
+  console.log({ pendingComments });
+  const notInCache = comments.filter(
+    c => !pendingComments.map(nr => nr.persistedAs).includes(c.id)
+  );
+  const topLevelPendingComments = pendingComments.map(pc => pc.comment);
+  const displayedComments = [...topLevelPendingComments, ...notInCache];
   const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
   console.log({
-    notReplies: notReplies.map(x => x.id),
-    notInCache: notInCache.map(x => x.id),
+    pendingComments: pendingComments.map(x => [x.persistedAs, x.comment.id]),
+    notInCache: notInCache.map(x => [x.id]),
     displayedComments: displayedComments.map(x => x.id),
     sortedComments: sortedComments.map(x => x.id),
   });
@@ -52,7 +46,7 @@ export default function Transcript() {
             {sortedComments.map(comment => (
               <div
                 className={
-                  notReplies.map(c => c.id).includes(comment.id)
+                  pendingComments.map(c => c.comment.id).includes(comment.id)
                     ? "border border-red-500"
                     : "border border-blue-500"
                 }

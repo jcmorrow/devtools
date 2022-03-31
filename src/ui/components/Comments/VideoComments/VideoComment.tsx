@@ -23,7 +23,7 @@ function VideoComment({
   const { scale } = canvas;
   const position = comment.position;
 
-  const isHighlighted = Object.keys(pendingComments).includes(hoveredComment.id);
+  const isHighlighted = Object.keys(pendingComments).includes(hoveredComment?.id);
 
   return (
     <div
