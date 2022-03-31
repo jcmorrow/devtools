@@ -277,6 +277,7 @@ function CommentCard({
             />
           </div>
         ))}
+        {/* Are we replying to this comment? */}
         {/* {isEditorOpen ? (
             <NewCommentEditor
               data={{
