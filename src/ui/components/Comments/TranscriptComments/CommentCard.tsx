@@ -14,7 +14,6 @@ import CommentActions from "./CommentActions";
 import CommentSource from "./CommentSource";
 
 import { AvatarImage } from "ui/components/Avatar";
-import { PENDING_COMMENT_ID } from "ui/reducers/comments";
 import { trackEvent } from "ui/utils/telemetry";
 import { commentKeys, formatRelativeTime } from "ui/utils/comments";
 import MaterialIcon from "ui/components/shared/MaterialIcon";
@@ -46,7 +45,7 @@ function PendingCommentCard({
   return (
     <div
       className={`group mx-auto w-full cursor-pointer border-b border-splitter bg-themeBase-90 transition`}
-      onMouseEnter={() => setHoveredComment(PENDING_COMMENT_ID)}
+      // onMouseEnter={() => setHoveredComment(PENDING_COMMENT_ID)}
       onMouseLeave={() => setHoveredComment(null)}
       onMouseDown={() => {
         trackEvent("comments.focus");
@@ -202,7 +201,7 @@ function CommentCard({
   comments,
   currentTime,
   executionPoint,
-  clearPendingComment,
+  removePendingComment,
   setModal,
   seekToComment,
   setHoveredComment,
@@ -224,7 +223,7 @@ function CommentCard({
   const replyKeys = commentKeys(comment.replies);
   const onAttachmentClick = () =>
     setModal("attachment", {
-      comment: { ...comment, content: "", parentId: comment.id, id: PENDING_COMMENT_ID },
+      comment: { ...comment, content: "", parentId: comment.id, id: comment.id },
     });
 
   const onSubmit = async (data: CommentData, inputValue: string) => {
@@ -246,21 +245,21 @@ function CommentCard({
     }
 
     setIsUpdating(false);
-    clearPendingComment();
+    removePendingComment(comment);
   };
 
-  if (comment.id === PENDING_COMMENT_ID) {
-    return (
-      <PendingCommentCard
-        comment={comment}
-        isFocused={isFocused}
-        setHoveredComment={setHoveredComment}
-        setIsFocused={setIsFocused}
-        setIsEditorOpen={setIsEditorOpen}
-        onSubmit={onSubmit}
-      />
-    );
-  }
+  // if (comment.id === PENDING_COMMENT_ID) {
+  //   return (
+  //     <PendingCommentCard
+  //       comment={comment}
+  //       isFocused={isFocused}
+  //       setHoveredComment={setHoveredComment}
+  //       setIsFocused={setIsFocused}
+  //       setIsEditorOpen={setIsEditorOpen}
+  //       onSubmit={onSubmit}
+  //     />
+  //   );
+  // }
 
   return (
     <div
@@ -319,7 +318,6 @@ function CommentCard({
                   updatedAt: new Date().toISOString(),
                   content: "",
                   parentId: comment.id,
-                  id: PENDING_COMMENT_ID,
                 },
               }}
               onSubmit={onSubmit}
@@ -356,13 +354,13 @@ const connector = connect(
   (state: UIState) => ({
     currentTime: selectors.getCurrentTime(state),
     executionPoint: getExecutionPoint(state),
-    pendingComment: selectors.getPendingComment(state),
+    pendingComments: selectors.getPendingComments(state),
   }),
   {
     seekToComment: actions.seekToComment,
     setHoveredComment: actions.setHoveredComment,
     setModal: actions.setModal,
-    clearPendingComment: actions.clearPendingComment,
+    removePendingComment: actions.removePendingComment,
   }
 );
 type PropsFromRedux = ConnectedProps<typeof connector>;

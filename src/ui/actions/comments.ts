@@ -6,8 +6,7 @@ import { UIThunkAction } from ".";
 import { ThreadFront } from "protocol/thread";
 import escapeHtml from "escape-html";
 import { waitForTime } from "protocol/utils";
-import { PENDING_COMMENT_ID } from "ui/reducers/comments";
-import { RecordingId, TimeStampedPoint } from "@recordreplay/protocol";
+import { RecordingId } from "@recordreplay/protocol";
 import { User } from "ui/types";
 import { setSelectedPrimaryPanel } from "./layout";
 import { getCurrentTime, getFocusRegion } from "ui/reducers/timeline";
@@ -23,26 +22,31 @@ const {
   getCodeMirror,
 } = require("devtools/client/debugger/src/utils/editor/create-editor");
 
-type SetPendingComment = Action<"set_pending_comment"> & { comment: PendingComment | null };
+type AddPendingComment = Action<"add_pending_comment"> & { comment: PendingComment };
+type UpdatePendingComment = Action<"update_pending_comment"> & { comment: PendingComment };
+type RemovePendingComment = Action<"remove_pending_comment"> & { id: string };
 type SetHoveredComment = Action<"set_hovered_comment"> & { comment: any };
-type UpdatePendingCommentContent = Action<"update_pending_comment_content"> & { content: string };
 
-export type CommentsAction = SetPendingComment | SetHoveredComment | UpdatePendingCommentContent;
+export type CommentsAction =
+  | AddPendingComment
+  | UpdatePendingComment
+  | SetHoveredComment
+  | RemovePendingComment;
 
-export function setPendingComment(comment: PendingComment): SetPendingComment {
-  return { type: "set_pending_comment", comment };
+export function addPendingComment(comment: PendingComment): AddPendingComment {
+  return { type: "add_pending_comment", comment };
+}
+
+export function updatePendingComment(comment: any): UpdatePendingComment {
+  return { type: "update_pending_comment", comment };
 }
 
 export function setHoveredComment(comment: any): SetHoveredComment {
   return { type: "set_hovered_comment", comment };
 }
 
-export function clearPendingComment(): SetPendingComment {
-  return { type: "set_pending_comment", comment: null };
-}
-
-export function updatePendingCommentContent(content: string): UpdatePendingCommentContent {
-  return { type: "update_pending_comment_content", content };
+export function removePendingComment(comment: { id: string }): RemovePendingComment {
+  return { type: "remove_pending_comment", id: comment.id };
 }
 
 export function createComment(
@@ -64,7 +68,7 @@ export function createComment(
         content: "",
         createdAt: new Date().toISOString(),
         hasFrames,
-        id: PENDING_COMMENT_ID,
+        id: crypto.randomUUID!(),
         networkRequestId: networkRequestId || null,
         point,
         position,
@@ -80,7 +84,7 @@ export function createComment(
     };
 
     dispatch(setSelectedPrimaryPanel("comments"));
-    dispatch(setPendingComment(pendingComment));
+    dispatch(addPendingComment(pendingComment));
   };
 }
 
@@ -190,7 +194,6 @@ export function createLabels(sourceLocation: {
 
 export function seekToComment(item: Comment | Reply | PendingComment["comment"]): UIThunkAction {
   return (dispatch, getState) => {
-    dispatch(clearPendingComment());
     const focusRegion = getFocusRegion(getState());
 
     if (focusRegion && (item.time < focusRegion.startTime || item.time > focusRegion.endTime)) {

@@ -67,141 +67,148 @@ type Coordinates = {
 };
 
 function CommentTool({
-  pendingComment,
+  pendingComments,
   currentTime,
   executionPoint,
   comments,
   areMouseTargetsLoading,
   canvas,
   createFrameComment,
-  setPendingComment,
+  addPendingComment,
   setSelectedPrimaryPanel,
 }: CommentToolProps) {
-  const [mousePosition, setMousePosition] = useState<Coordinates | null>(null);
-  const recordingId = useGetRecordingId();
-  const { user } = useAuth0();
-  const { userId } = useGetUserId();
-  const captionNode = useRef<HTMLDivElement | null>(null);
+  return null;
+  // const [mousePosition, setMousePosition] = useState<Coordinates | null>(null);
+  // const recordingId = useGetRecordingId();
+  // const { user } = useAuth0();
+  // const { userId } = useGetUserId();
+  // const captionNode = useRef<HTMLDivElement | null>(null);
 
-  const addListeners = () => {
-    const videoNode = document.getElementById("graphics");
+  // const addListeners = () => {
+  //   const videoNode = document.getElementById("graphics");
 
-    if (videoNode) {
-      videoNode.classList.add("location-marker");
-      videoNode.addEventListener("mousedown", onMouseDown);
-      videoNode.addEventListener("mouseup", onClickInCanvas);
-      videoNode.addEventListener("mousemove", onMouseMove);
-      videoNode.addEventListener("mouseleave", onMouseLeave);
-    }
-  };
-  const removeListeners = () => {
-    const videoNode = document.getElementById("graphics");
+  //   if (videoNode) {
+  //     videoNode.classList.add("location-marker");
+  //     videoNode.addEventListener("mousedown", onMouseDown);
+  //     videoNode.addEventListener("mouseup", onClickInCanvas);
+  //     videoNode.addEventListener("mousemove", onMouseMove);
+  //     videoNode.addEventListener("mouseleave", onMouseLeave);
+  //   }
+  // };
+  // const removeListeners = () => {
+  //   const videoNode = document.getElementById("graphics");
 
-    if (videoNode) {
-      videoNode.classList.remove("location-marker");
-      videoNode.removeEventListener("mousedown", onMouseDown);
-      videoNode.removeEventListener("mouseup", onClickInCanvas);
-      videoNode.removeEventListener("mousemove", onMouseMove);
-      videoNode.removeEventListener("mouseleave", onMouseLeave);
-    }
-  };
-  const onMouseDown = (evt: MouseEvent) => {
-    if (!pendingComment || !document.activeElement) {
-      return;
-    }
+  //   if (videoNode) {
+  //     videoNode.classList.remove("location-marker");
+  //     videoNode.removeEventListener("mousedown", onMouseDown);
+  //     videoNode.removeEventListener("mouseup", onClickInCanvas);
+  //     videoNode.removeEventListener("mousemove", onMouseMove);
+  //     videoNode.removeEventListener("mouseleave", onMouseLeave);
+  //   }
+  // };
+  // const onMouseDown = (evt: MouseEvent) => {
+  //   if (!pendingComments.length || !document.activeElement) {
+  //     return;
+  //   }
 
-    const pendingCommentEditorId = getCommentEditorDOMId(pendingComment.comment);
-    // this uses `[id="..."]` because comment ids can have "="s in them!
-    const isEditorFocused = !!document.activeElement.closest(`[id="${pendingCommentEditorId}"]`);
+  //   const pendingCommentEditorIds = Object.values(pendingComments).map(x =>
+  //     getCommentEditorDOMId(x.comment)
+  //   );
+  //   // this uses `[id="..."]` because comment ids can have "="s in them!
 
-    // If the pending comment's editor is focused, comment tool clicks should not take focus from it.
-    if (isEditorFocused) {
-      evt.preventDefault();
-    }
-  };
-  const onClickInCanvas = async (e: MouseEvent) => {
-    if (e.target !== document.querySelector("canvas#graphics")) {
-      return;
-    }
+  //   const isEditorFocused = pendingCommentEditorIds.find(id =>
+  //     Boolean(document.activeElement?.closest(`[id="${id}"]`))
+  //   );
 
-    // If there's no pending comment at that point and time, create one
-    // with the mouse click as its position.
-    if (!pendingComment) {
-      createFrameComment(
-        currentTime,
-        executionPoint,
-        mouseEventCanvasPosition(e),
-        { ...user, id: userId },
-        recordingId
-      );
-      return;
-    }
+  //   // If the pending comment's editor is focused, comment tool clicks should not take focus from it.
+  //   if (isEditorFocused) {
+  //     evt.preventDefault();
+  //   }
+  // };
+  // const onClickInCanvas = async (e: MouseEvent) => {
+  //   if (e.target !== document.querySelector("canvas#graphics")) {
+  //     return;
+  //   }
 
-    // If there's a pending comment (not a reply), change its position.
-    if (pendingComment.type == "new_comment" || pendingComment.type == "edit_comment") {
-      const newComment = { ...pendingComment };
-      newComment.comment.position = mouseEventCanvasPosition(e);
+  //   // If there's no pending comment at that point and time, create one
+  //   // with the mouse click as its position.
+  //   if (!pendingComments.length) {
+  //     createFrameComment(
+  //       currentTime,
+  //       executionPoint,
+  //       mouseEventCanvasPosition(e),
+  //       { ...user, id: userId },
+  //       recordingId
+  //     );
+  //     return;
+  //   }
 
-      setPendingComment(newComment);
-      setSelectedPrimaryPanel("comments");
-    }
-  };
+  //   // If there's a pending comment (not a reply), change its position.
+  //   // if (pendingComment.type == "new_comment" || pendingComment.type == "edit_comment") {
+  //   //   const newComment = { ...pendingComment };
+  //   //   newComment.comment.position = mouseEventCanvasPosition(e);
 
-  const onMouseMove = (e: MouseEvent) => setMousePosition(mouseEventCanvasPosition(e));
-  const onMouseLeave = () => {
-    setMousePosition(null);
-  };
+  //   //   console.log("ADDING PENDING COMMENT");
+  //   //   addPendingComment(newComment);
+  //   //   setSelectedPrimaryPanel("comments");
+  //   // }
+  // };
 
-  // Re-register the listener on every update to prevent the props used by
-  // the handler functions from being stale.
-  useEffect(() => {
-    addListeners();
-    return () => removeListeners();
-  }, [currentTime, executionPoint, pendingComment, comments]);
+  // const onMouseMove = (e: MouseEvent) => setMousePosition(mouseEventCanvasPosition(e));
+  // const onMouseLeave = () => {
+  //   setMousePosition(null);
+  // };
 
-  if (
-    !mousePosition ||
-    pendingComment?.type === "edit_reply" ||
-    pendingComment?.type === "new_reply"
-  ) {
-    return null;
-  }
+  // // Re-register the listener on every update to prevent the props used by
+  // // the handler functions from being stale.
+  // useEffect(() => {
+  //   addListeners();
+  //   return () => removeListeners();
+  // }, [currentTime, executionPoint, pendingComment, comments]);
 
-  const { parentStyle, childStyle } = getStyles(mousePosition, canvas!, captionNode.current);
-  let label = "Add comment";
-  if (areMouseTargetsLoading) {
-    label = "Targets loading...";
-  } else if (pendingComment?.type === "new_comment" || pendingComment?.type === "edit_comment") {
-    label = "Move the marker";
-  }
+  // if (
+  //   !mousePosition ||
+  //   pendingComment?.type === "edit_reply" ||
+  //   pendingComment?.type === "new_reply"
+  // ) {
+  //   return null;
+  // }
 
-  return (
-    <div style={parentStyle} className="absolute">
-      <div
-        className={classNames(
-          "absolute flex w-max items-center space-x-1.5 rounded-2xl bg-black bg-opacity-70 px-2.5 py-1 text-xs text-white",
-          !captionNode.current ? "invisible" : ""
-        )}
-        style={childStyle}
-        ref={captionNode}
-      >
-        <span>{label}</span>
-      </div>
-    </div>
-  );
+  // const { parentStyle, childStyle } = getStyles(mousePosition, canvas!, captionNode.current);
+  // let label = "Add comment";
+  // if (areMouseTargetsLoading) {
+  //   label = "Targets loading...";
+  // } else if (pendingComment?.type === "new_comment" || pendingComment?.type === "edit_comment") {
+  //   label = "Move the marker";
+  // }
+
+  // return (
+  //   <div style={parentStyle} className="absolute">
+  //     <div
+  //       className={classNames(
+  //         "absolute flex w-max items-center space-x-1.5 rounded-2xl bg-black bg-opacity-70 px-2.5 py-1 text-xs text-white",
+  //         !captionNode.current ? "invisible" : ""
+  //       )}
+  //       style={childStyle}
+  //       ref={captionNode}
+  //     >
+  //       <span>{label}</span>
+  //     </div>
+  //   </div>
+  // );
 }
 
 const connector = connect(
   (state: UIState) => ({
     recordingTarget: selectors.getRecordingTarget(state),
-    pendingComment: selectors.getPendingComment(state),
+    pendingComments: selectors.getPendingComments(state),
     executionPoint: getExecutionPoint(state),
     currentTime: selectors.getCurrentTime(state),
     canvas: selectors.getCanvas(state),
     areMouseTargetsLoading: selectors.areMouseTargetsLoading(state),
   }),
   {
-    setPendingComment: actions.setPendingComment,
+    addPendingComment: actions.addPendingComment,
     createFrameComment: actions.createFrameComment,
     setSelectedPrimaryPanel: actions.setSelectedPrimaryPanel,
   }

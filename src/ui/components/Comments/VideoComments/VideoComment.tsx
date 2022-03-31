@@ -14,7 +14,7 @@ function VideoComment({
   canvas,
   setHoveredComment,
   hoveredComment,
-  pendingComment,
+  pendingComments,
 }: PropsFromRedux) {
   if (!canvas || !comment) {
     return null;
@@ -23,7 +23,7 @@ function VideoComment({
   const { scale } = canvas;
   const position = comment.position;
 
-  const isHighlighted = hoveredComment === comment.id || pendingComment?.comment === comment;
+  const isHighlighted = Object.keys(pendingComments).includes(hoveredComment.id);
 
   return (
     <div
@@ -56,7 +56,7 @@ function VideoComment({
 
 const connector = connect(
   (state: UIState) => ({
-    pendingComment: selectors.getPendingComment(state),
+    pendingComments: selectors.getPendingComments(state),
     canvas: selectors.getCanvas(state),
     hoveredComment: selectors.getHoveredComment(state),
   }),

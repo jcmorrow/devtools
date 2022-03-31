@@ -23,14 +23,6 @@ function Comments({ pendingComment, hoveredItem }: PropsFromRedux) {
 
   const comments: (Comment | PendingComment["comment"])[] = [...hasuraComments];
 
-  // New comments that haven't been sent to Hasura will not have an associated ID.
-  // They're not included in the comments data from the query, so we have to insert
-  // them manually here. If a pending comment has an ID, it already exists in the
-  // comments data and we don't have to insert it.
-  if (pendingComment && !(pendingComment as any).id) {
-    comments.push(pendingComment.comment);
-  }
-
   const sortedComments = sortBy(comments, comment => comment.time);
 
   return (
@@ -52,7 +44,7 @@ function Comments({ pendingComment, hoveredItem }: PropsFromRedux) {
 
 const connector = connect((state: UIState) => ({
   playback: selectors.getPlayback(state),
-  pendingComment: selectors.getPendingComment(state),
+  pendingComment: selectors.getPendingComments(state),
   hoveredItem: selectors.getHoveredItem(state),
 }));
 type PropsFromRedux = ConnectedProps<typeof connector>;

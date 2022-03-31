@@ -7,8 +7,7 @@ import { Comment } from "ui/state/comments";
 import CommentCard from "ui/components/Comments/TranscriptComments/CommentCard";
 import useAuth0 from "ui/utils/useAuth0";
 import MaterialIcon from "ui/components/shared/MaterialIcon";
-import { commentKey } from "ui/utils/comments";
-import uniqBy from "lodash/uniqBy";
+import { uniqBy } from "lodash";
 
 export default function Transcript() {
   const recordingId = hooks.useGetRecordingId();
@@ -16,21 +15,20 @@ export default function Transcript() {
   const recording = hooks.useGetRecording(recordingId);
   const auth = useAuth0();
 
-  const pendingComment = useSelector(selectors.getPendingComment);
+  const pendingComments = Object.values(useSelector(selectors.getPendingComments));
   const { isAuthenticated } = useAuth0();
 
-  const displayedComments = useMemo(() => {
-    const displayedComments: Comment[] = [...comments].filter(
-      comment => !pendingComment || commentKey(comment) != commentKey(pendingComment.comment)
-    );
+  // const displayedComments = useMemo(() => {
+  //   const displayedComments: Comment[] = [...comments].filter(comment => true);
 
-    if (pendingComment?.type == "new_comment") {
-      displayedComments.push(pendingComment.comment);
-    }
-
-    const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
-    return sortedComments;
-  }, [comments, pendingComment]);
+  //   const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
+  //   return sortedComments;
+  // }, [comments]);
+  const notReplies = pendingComments
+    .filter(c => c.type === "new_comment")
+    .map(c => c.comment) as Comment[];
+  const displayedComments: Comment[] = uniqBy([...notReplies, ...comments], "id");
+  const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
 
   if (loading || auth.isLoading || recording.loading) {
     return null;
@@ -42,14 +40,10 @@ export default function Transcript() {
         <div className="right-sidebar-toolbar-item comments">Comments</div>
       </div>
       <div className="transcript-list flex h-full flex-grow flex-col items-center overflow-auto overflow-x-hidden bg-bodyBgcolor text-xs">
-        {displayedComments.length > 0 ? (
+        {sortBy.length > 0 ? (
           <div className="w-full flex-grow overflow-auto bg-bodyBgcolor">
             {displayedComments.map(comment => (
-              <CommentCard
-                comments={displayedComments}
-                comment={comment}
-                key={commentKey(comment)}
-              />
+              <CommentCard comments={displayedComments} comment={comment} key={comment.id} />
             ))}
           </div>
         ) : (

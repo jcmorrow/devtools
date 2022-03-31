@@ -28,7 +28,7 @@ type CommentEditorProps = PropsFromRedux & {
 };
 
 function CommentEditor({
-  clearPendingComment,
+  removePendingComment,
   comment,
   editable,
   handleSubmit,
@@ -60,7 +60,7 @@ function CommentEditor({
               content={comment.content || ""}
               editable={editable}
               handleCancel={() => {
-                clearPendingComment();
+                removePendingComment(comment);
                 handleCancel();
                 blur();
                 close();
@@ -85,11 +85,8 @@ function CommentEditor({
   );
 }
 
-const connector = connect(
-  (state: UIState) => ({
-    pendingComment: selectors.getPendingComment(state),
-  }),
-  { clearPendingComment: actions.clearPendingComment }
-);
+const connector = connect(() => ({}), {
+  removePendingComment: actions.removePendingComment,
+});
 type PropsFromRedux = ConnectedProps<typeof connector>;
 export default connector(CommentEditor);
