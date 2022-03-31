@@ -1,13 +1,12 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { selectors } from "ui/reducers";
-import sortBy from "lodash/sortBy";
 import hooks from "ui/hooks";
 import { Comment } from "ui/state/comments";
 import CommentCard from "ui/components/Comments/TranscriptComments/CommentCard";
 import useAuth0 from "ui/utils/useAuth0";
 import MaterialIcon from "ui/components/shared/MaterialIcon";
-import { uniqBy } from "lodash";
+import { sortBy, uniqBy } from "lodash";
 
 export default function Transcript() {
   const recordingId = hooks.useGetRecordingId();
@@ -27,8 +26,15 @@ export default function Transcript() {
   const notReplies = pendingComments
     .filter(c => c.type === "new_comment")
     .map(c => c.comment) as Comment[];
+  console.log({ notReplies });
   const displayedComments: Comment[] = uniqBy([...notReplies, ...comments], "id");
   const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
+  console.log({
+    displayedComments,
+    loading,
+    authLoading: auth.isLoading,
+    reocrdingLoading: recording.loading,
+  });
 
   if (loading || auth.isLoading || recording.loading) {
     return null;
@@ -40,9 +46,9 @@ export default function Transcript() {
         <div className="right-sidebar-toolbar-item comments">Comments</div>
       </div>
       <div className="transcript-list flex h-full flex-grow flex-col items-center overflow-auto overflow-x-hidden bg-bodyBgcolor text-xs">
-        {sortBy.length > 0 ? (
+        {sortedComments.length > 0 ? (
           <div className="w-full flex-grow overflow-auto bg-bodyBgcolor">
-            {displayedComments.map(comment => (
+            {sortedComments.map(comment => (
               <CommentCard comments={displayedComments} comment={comment} key={comment.id} />
             ))}
           </div>

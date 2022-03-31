@@ -234,15 +234,16 @@ function CommentCard({
     }
 
     setIsUpdating(true);
-    if (type == "new_reply") {
-      await addCommentReply({ ...comment, content: inputValue });
-    } else if (type == "new_comment") {
-      await addComment({ ...comment, content: inputValue });
-    } else if (type === "comment") {
-      await updateComment(comment.id, inputValue, (comment as Comment).position);
-    } else if (type === "reply") {
-      await updateCommentReply(comment.id, inputValue);
-    }
+    // if (type == "new_reply") {
+    //   await addCommentReply({ ...comment, content: inputValue });
+    // } else if (type == "new_comment") {
+    // @ts-ignore
+    await addComment({ ...comment, content: inputValue });
+    // } else if (type === "comment") {
+    //   await updateComment(comment.id, inputValue, (comment as Comment).position);
+    // } else if (type === "reply") {
+    //   await updateCommentReply(comment.id, inputValue);
+    // }
 
     setIsUpdating(false);
     removePendingComment(comment);
