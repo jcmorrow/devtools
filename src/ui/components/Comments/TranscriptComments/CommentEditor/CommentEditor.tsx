@@ -1,8 +1,6 @@
 import React, { useMemo } from "react";
 import { connect, ConnectedProps } from "react-redux";
-import { selectors } from "ui/reducers";
 import { actions } from "ui/actions";
-import { UIState } from "ui/state";
 import hooks from "ui/hooks";
 import { Comment, Reply } from "ui/state/comments";
 

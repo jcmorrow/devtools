@@ -7,17 +7,13 @@ import { actions } from "ui/actions";
 import hooks from "ui/hooks";
 import useAuth0 from "ui/utils/useAuth0";
 
-import NewCommentEditor from "./CommentEditor/NewCommentEditor";
 import { Comment, Reply } from "ui/state/comments";
 import ExistingCommentEditor from "./CommentEditor/ExistingCommentEditor";
 import CommentActions from "./CommentActions";
 import CommentSource from "./CommentSource";
 
 import { AvatarImage } from "ui/components/Avatar";
-import { trackEvent } from "ui/utils/telemetry";
 import { commentKeys, formatRelativeTime } from "ui/utils/comments";
-import MaterialIcon from "ui/components/shared/MaterialIcon";
-import { features } from "ui/utils/prefs";
 import { getFocusRegion } from "ui/reducers/timeline";
 import NetworkRequestPreview from "./NetworkRequestPreview";
 import { useFeature } from "ui/hooks/settings";
@@ -25,52 +21,6 @@ import { CommentData } from "./types";
 import { useGetUserId } from "ui/hooks/users";
 import { updatePendingComment } from "ui/actions/comments";
 const { getExecutionPoint } = require("devtools/client/debugger/src/reducers/pause");
-
-type PendingCommentProps = {
-  comment: Comment;
-  isFocused: boolean;
-  setIsEditorOpen: (isEditorOpen: boolean) => void;
-  setHoveredComment: (id: string | null) => void;
-  setIsFocused: (b: boolean) => void;
-  onSubmit: (data: CommentData, inputValue: string) => void;
-};
-
-function PendingCommentCard({
-  comment,
-  isFocused,
-  setHoveredComment,
-  setIsFocused,
-  setIsEditorOpen,
-  onSubmit,
-}: PendingCommentProps) {
-  return (
-    <div
-      className={`group mx-auto w-full cursor-pointer border-b border-splitter bg-themeBase-90 transition`}
-      // onMouseEnter={() => setHoveredComment(PENDING_COMMENT_ID)}
-      onMouseLeave={() => setHoveredComment(null)}
-      onMouseDown={() => {
-        trackEvent("comments.focus");
-        setIsFocused(true);
-      }}
-    >
-      <div className={classNames("w-full border-l-2 border-secondaryAccent py-2.5")}>
-        <div className={classNames("space-y-2 px-2.5 pl-2")}>
-          <CommentTarget comment={comment} />
-          <FocusContext.Provider
-            value={{
-              autofocus: true,
-              isFocused,
-              blur: () => setIsFocused(false),
-              close: () => setIsEditorOpen(false),
-            }}
-          >
-            <NewCommentEditor data={{ type: "new_comment", comment }} onSubmit={onSubmit} />
-          </FocusContext.Provider>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function BorderBridge({
   comments,
@@ -139,14 +89,16 @@ function CommentItemHeader({
 
 function CommentItem({
   data,
-  onSubmit,
+  editing,
   isUpdating,
+  onSubmit,
 }: {
   data: CommentData;
-  onSubmit: (data: CommentData, inputValue: string) => void;
+  editing?: boolean;
   isUpdating: boolean;
+  onSubmit: (data: CommentData, inputValue: string) => void;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(editing);
   const { userId } = useGetUserId();
 
   const maybeSetIsUpdating = (value: boolean) => {
@@ -165,7 +117,7 @@ function CommentItem({
       <ExistingCommentEditor
         data={data}
         onSubmit={onSubmit}
-        isEditing={isEditing}
+        isEditing={Boolean(isEditing)}
         setIsEditing={maybeSetIsUpdating}
       />
     </div>
@@ -185,8 +137,10 @@ function CommentTarget({ comment }: { comment: Comment }) {
 }
 
 type PropsFromParent = {
+  autofocus?: boolean;
   comment: Comment;
   comments: Comment[];
+  editing?: boolean;
 };
 type CommentCardProps = PropsFromRedux & PropsFromParent;
 
@@ -201,6 +155,7 @@ function CommentCard({
   comment,
   comments,
   currentTime,
+  editing,
   executionPoint,
   setModal,
   seekToComment,
@@ -213,7 +168,7 @@ function CommentCard({
   const dispatch = useDispatch();
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState(!!editing);
   const [isUpdating, setIsUpdating] = useState(false);
   const { isAuthenticated } = useAuth0();
   const addComment = hooks.useAddComment();
@@ -221,7 +176,7 @@ function CommentCard({
   const updateComment = hooks.useUpdateComment();
   const updateCommentReply = hooks.useUpdateCommentReply();
 
-  console.log({ comment });
+  console.log({ comment, editing });
   const replyKeys = commentKeys(comment.replies);
   const onAttachmentClick = () =>
     setModal("attachment", {
@@ -297,11 +252,21 @@ function CommentCard({
         })}
       >
         <CommentTarget comment={comment} />
-        <CommentItem
-          data={{ type: "comment", comment }}
-          onSubmit={onSubmit}
-          isUpdating={isUpdating}
-        />
+        <FocusContext.Provider
+          value={{
+            autofocus: isFocused,
+            isFocused,
+            blur: () => setIsFocused(false),
+            close: () => setIsEditorOpen(false),
+          }}
+        >
+          <CommentItem
+            editing={editing}
+            data={{ type: "comment", comment }}
+            onSubmit={onSubmit}
+            isUpdating={isUpdating}
+          />
+        </FocusContext.Provider>
 
         {comment.replies?.map((reply: Reply, i: number) => (
           <div key={replyKeys[i]}>
@@ -312,15 +277,7 @@ function CommentCard({
             />
           </div>
         ))}
-        {isEditorOpen ? (
-          <FocusContext.Provider
-            value={{
-              autofocus: isFocused,
-              isFocused,
-              blur: () => setIsFocused(false),
-              close: () => setIsEditorOpen(false),
-            }}
-          >
+        {/* {isEditorOpen ? (
             <NewCommentEditor
               data={{
                 type: "new_reply",
@@ -356,7 +313,7 @@ function CommentCard({
               )}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

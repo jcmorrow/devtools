@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { selectors } from "ui/reducers";
 import hooks from "ui/hooks";
-import { Comment } from "ui/state/comments";
 import CommentCard from "ui/components/Comments/TranscriptComments/CommentCard";
 import useAuth0 from "ui/utils/useAuth0";
 import MaterialIcon from "ui/components/shared/MaterialIcon";
@@ -51,7 +50,14 @@ export default function Transcript() {
                     : "border border-blue-500"
                 }
               >
-                <CommentCard comments={displayedComments} comment={comment} key={comment.id} />
+                <CommentCard
+                  editing={
+                    !!pendingComments.find(c => c.comment.id === comment.id && !c.persistedAs)
+                  }
+                  comments={displayedComments}
+                  comment={comment}
+                  key={comment.id}
+                />
               </div>
             ))}
           </div>
