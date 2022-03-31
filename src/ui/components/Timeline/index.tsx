@@ -122,15 +122,8 @@ class Timeline extends Component<PropsFromRedux, { isDragging: boolean }> {
   };
 
   onPlayerMouseUp = (e: MouseEvent | React.MouseEvent) => {
-    const {
-      hoverTime,
-      isFocusing,
-      seek,
-      clearPendingComment,
-      setTimelineToTime,
-      setTimelineState,
-      focusRegion,
-    } = this.props;
+    const { hoverTime, isFocusing, seek, setTimelineToTime, setTimelineState, focusRegion } =
+      this.props;
     // if the user clicked on a comment marker, we already seek to the comment's
     // execution point, so we don't want to seek a second time here
     const clickedOnCommentMarker =
@@ -153,7 +146,6 @@ class Timeline extends Component<PropsFromRedux, { isDragging: boolean }> {
           setTimelineToTime(ThreadFront.currentTime, true);
           setTimelineState({ currentTime: ThreadFront.currentTime });
         }
-        clearPendingComment();
       }
     }
   };
@@ -170,7 +162,6 @@ class Timeline extends Component<PropsFromRedux, { isDragging: boolean }> {
       startPlayback,
       stopPlayback,
       replayPlayback,
-      clearPendingComment,
       videoUrl,
       focusRegion,
     } = this.props;
@@ -180,7 +171,6 @@ class Timeline extends Component<PropsFromRedux, { isDragging: boolean }> {
         return;
       }
       trackEvent("timeline.replay");
-      clearPendingComment();
       replayPlayback();
     };
     const togglePlayback = () => {
@@ -188,7 +178,6 @@ class Timeline extends Component<PropsFromRedux, { isDragging: boolean }> {
         return;
       }
 
-      clearPendingComment();
       if (playback) {
         trackEvent("timeline.pause");
         stopPlayback();
@@ -441,7 +430,6 @@ const connector = connect(
     startPlayback: actions.startPlayback,
     stopPlayback: actions.stopPlayback,
     replayPlayback: actions.replayPlayback,
-    clearPendingComment: actions.clearPendingComment,
   }
 );
 type PropsFromRedux = ConnectedProps<typeof connector>;
