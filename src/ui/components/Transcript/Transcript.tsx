@@ -27,13 +27,14 @@ export default function Transcript() {
     .filter(c => c.type === "new_comment")
     .map(c => c.comment) as Comment[];
   console.log({ notReplies });
-  const displayedComments: Comment[] = uniqBy([...notReplies, ...comments], "id");
+  const notInCache = comments.filter(c => !notReplies.map(nr => nr.id).includes(c.id));
+  const displayedComments: Comment[] = [...notReplies, ...notInCache];
   const sortedComments = sortBy(displayedComments, ["time", "createdAt"]);
   console.log({
-    displayedComments,
-    loading,
-    authLoading: auth.isLoading,
-    reocrdingLoading: recording.loading,
+    notReplies: notReplies.map(x => x.id),
+    notInCache: notInCache.map(x => x.id),
+    displayedComments: displayedComments.map(x => x.id),
+    sortedComments: sortedComments.map(x => x.id),
   });
 
   if (loading || auth.isLoading || recording.loading) {
@@ -49,7 +50,15 @@ export default function Transcript() {
         {sortedComments.length > 0 ? (
           <div className="w-full flex-grow overflow-auto bg-bodyBgcolor">
             {sortedComments.map(comment => (
-              <CommentCard comments={displayedComments} comment={comment} key={comment.id} />
+              <div
+                className={
+                  notReplies.map(c => c.id).includes(comment.id)
+                    ? "border border-red-500"
+                    : "border border-blue-500"
+                }
+              >
+                <CommentCard comments={displayedComments} comment={comment} key={comment.id} />
+              </div>
             ))}
           </div>
         ) : (

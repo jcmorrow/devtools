@@ -68,7 +68,7 @@ export function createComment(
         content: "",
         createdAt: new Date().toISOString(),
         hasFrames,
-        id: crypto.randomUUID!(),
+        id: btoa(`c:${crypto.randomUUID!()}`),
         networkRequestId: networkRequestId || null,
         point,
         position,

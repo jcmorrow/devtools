@@ -246,7 +246,7 @@ function CommentCard({
     // }
 
     setIsUpdating(false);
-    removePendingComment(comment);
+    // removePendingComment(comment);
   };
 
   // if (comment.id === PENDING_COMMENT_ID) {
